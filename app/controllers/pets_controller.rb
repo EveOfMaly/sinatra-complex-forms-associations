@@ -11,27 +11,49 @@ class PetsController < ApplicationController
   end
 
   post '/pets' do 
-    # @pets = Pet.create(params[:pets])
 
-    #should automatically link owner_id 
     if params[:owner][:name].empty?
-      @owner = Owner.find(params[:pets][:owner_id])
+      @owner = Owner.find_by(id: params[:pets][:owner_id])
       @pet = Pet.create(params[:pets])
       @pet.owner = @owner
+      @pet.save
     elsif !params[:owner][:name].empty?
       @pet = Pet.create(params[:pets])
       @pet.owner = Owner.create(params[:owner])
+      @pet.save
     end
     redirect to "pets/#{@pet.id}"
   end
 
   get '/pets/:id' do 
     @pet = Pet.find(params[:id])
+
     erb :'/pets/show'
+   
   end
 
   patch '/pets/:id' do 
+  
+    @pet = Pet.find(params[:id])
 
+    if params[:owner][:name].empty?
+      @pet.update(params[:pet])
+      @pet.save
+    else
+      @owner = Owner.create(params[:owner])
+      @pet.update(params[:pet])
+      @pet.owner = @owner
+      @pet.save
+    end
     redirect to "pets/#{@pet.id}"
   end
+
+  get '/pets/:id/edit' do 
+    @owners = Owner.all
+    @pet = Pet.find(params[:id])
+
+
+    erb :'/pets/edit'
+  end
+
 end
